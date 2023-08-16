@@ -140,7 +140,7 @@ export const EditEvent = ({
 
     const [calendarIndex, setCalendarIndex] = useState(defaultCalendarIndex);
     const colorIndex = calendars[defaultCalendarIndex].category.findIndex(
-        (x) => x.color === initialEvent?.backgroundColor
+        (x) => x.color === initialEvent?.color
     );
     const [calendarColorIndex, setCalendarColorIndex] = useState(
         colorIndex == -1 ? defaultCalendarIndex : colorIndex
@@ -196,8 +196,7 @@ export const EditEvent = ({
                           endDate: endDate || null,
                           completed: isTask ? complete : null,
                       }),
-                backgroundColor: `'${calendars[calendarIndex]?.category[calendarColorIndex]?.color}'`,
-                borderColor: `'${calendars[calendarIndex]?.category[calendarColorIndex]?.color}'`,
+                color: `'${calendars[calendarIndex]?.category[calendarColorIndex]?.color}'`,
             },
             calendarIndex
         );
