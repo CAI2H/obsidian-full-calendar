@@ -107,9 +107,14 @@ export function toEventInput(
         id,
         title: frontmatter.title,
         allDay: frontmatter.allDay,
-        backgroundColor: frontmatter.color?.replace(/^'(.+)'$/, "$1"),
-        borderColor: frontmatter.color?.replace(/^'(.+)'$/, "$1"),
     };
+    if (frontmatter.color) {
+        event = {
+            ...event,
+            backgroundColor: frontmatter.color.replace(/^'(.+)'$/, "$1"),
+            borderColor: frontmatter.color.replace(/^'(.+)'$/, "$1"),
+        };
+    }
     if (frontmatter.type === "recurring") {
         event = {
             ...event,
@@ -238,6 +243,7 @@ export function fromEventApi(event: EventApi): OFCEvent {
     const endDate = getDate(event.end as Date);
     return {
         title: event.title,
+        color: event.backgroundColor,
         ...(event.allDay
             ? { allDay: true }
             : {
