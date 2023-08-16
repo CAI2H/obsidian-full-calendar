@@ -1,4 +1,4 @@
-import { CalendarInfo, EventLocation, OFCEvent } from "src/types";
+import { CalendarInfo, EventLocation, OFCEvent, ClassifyInfo } from "src/types";
 
 export const ID_SEPARATOR = "::";
 
@@ -20,6 +20,7 @@ export abstract class Calendar {
         return `${this.type}${ID_SEPARATOR}${this.identifier}`;
     }
     abstract get name(): string;
+    abstract get category(): ClassifyInfo[];
 
     /**
      * Return events along with their associated source files, if they exist.

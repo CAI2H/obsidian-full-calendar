@@ -1,10 +1,23 @@
 import { ZodError, z } from "zod";
 import { OFCEvent } from "./schema";
 
+const classify = z.object({ name: z.string(), color: z.string() });
 const calendarOptionsSchema = z.discriminatedUnion("type", [
-    z.object({ type: z.literal("local"), directory: z.string() }),
-    z.object({ type: z.literal("dailynote"), heading: z.string() }),
-    z.object({ type: z.literal("ical"), url: z.string().url() }),
+    z.object({
+        type: z.literal("local"),
+        directory: z.string(),
+        category: z.array(classify),
+    }),
+    z.object({
+        type: z.literal("dailynote"),
+        heading: z.string(),
+        category: z.array(classify),
+    }),
+    z.object({
+        type: z.literal("ical"),
+        url: z.string().url(),
+        category: z.array(classify),
+    }),
     z.object({
         type: z.literal("caldav"),
         name: z.string(),
@@ -12,6 +25,7 @@ const calendarOptionsSchema = z.discriminatedUnion("type", [
         homeUrl: z.string().url(),
         username: z.string(),
         password: z.string(),
+        category: z.array(classify),
     }),
 ]);
 
@@ -22,6 +36,8 @@ export type TestSource = {
     id: string;
     events?: OFCEvent[];
 };
+
+export type ClassifyInfo = z.infer<typeof classify>;
 
 export type CalendarInfo = (
     | z.infer<typeof calendarOptionsSchema>
@@ -65,9 +81,14 @@ export function makeDefaultPartialCalendarSource(
             url: "https://caldav.icloud.com",
         };
     }
-
+    const category = new Array<ClassifyInfo>();
+    category.push({
+        name: "default",
+        color: "#8f4d4d",
+    });
     return {
         type: type,
+        category,
         color: getComputedStyle(document.body)
             .getPropertyValue("--interactive-accent")
             .trim(),

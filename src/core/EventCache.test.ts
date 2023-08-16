@@ -53,6 +53,10 @@ class TestReadonlyCalendar extends Calendar {
     async getEvents(): Promise<EventResponse[]> {
         return this.events.map((event) => [event, null]);
     }
+
+    get category(): { name: string; color: string }[] {
+        return [];
+    }
 }
 
 // For tests, we only want test calendars to
@@ -212,6 +216,10 @@ class TestEditable extends EditableCalendar {
     }
     get directory(): string {
         return this._directory;
+    }
+
+    get category(): { name: string; color: string }[] {
+        return [];
     }
 
     containsPath(path: string): boolean {

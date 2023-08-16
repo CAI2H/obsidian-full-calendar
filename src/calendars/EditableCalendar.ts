@@ -1,6 +1,6 @@
 import { TFile } from "obsidian";
 import { EventPathLocation } from "src/core/EventStore";
-import { EventLocation, OFCEvent } from "src/types";
+import { EventLocation, OFCEvent, ClassifyInfo } from "src/types";
 import { Calendar } from "./Calendar";
 
 export type EditableEventResponse = [OFCEvent, EventLocation];

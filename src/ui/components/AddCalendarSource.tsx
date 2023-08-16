@@ -1,10 +1,15 @@
 import * as React from "react";
 import { useState } from "react";
-import { CalendarInfo } from "../../types";
+import { CalendarInfo, ClassifyInfo } from "../../types";
 
 type ChangeListener = <T extends Partial<CalendarInfo>>(
     fromString: (val: string) => T
 ) => React.ChangeEventHandler<HTMLInputElement | HTMLSelectElement>;
+
+type UpdateSettingListener = <T extends Partial<CalendarInfo>>(
+    provider: () => T
+) => void;
+
 type SourceWith<T extends Partial<CalendarInfo>, K> = T extends K ? T : never;
 
 interface DirectorySelectProps<T extends Partial<CalendarInfo>> {
@@ -79,6 +84,121 @@ function ColorPicker<T extends Partial<CalendarInfo>>({
                     onChange={changeListener((x) => ({ ...source, color: x }))}
                 />
             </div>
+        </div>
+    );
+}
+
+interface ColorPickerRowProps {
+    setting: ClassifyInfo;
+    onSettingChange: (classifyInfo: ClassifyInfo) => void;
+    deleteCalendar: () => void;
+}
+
+interface ColorPickerGroupProps<T extends Partial<CalendarInfo>> {
+    source: T;
+    updateSettingListener: UpdateSettingListener;
+}
+
+const ColorPickerRow = ({
+    setting,
+    onSettingChange,
+    deleteCalendar,
+}: ColorPickerRowProps) => {
+    console.log("reload:" + JSON.stringify(setting));
+    return (
+        <div className="setting-item">
+            <button
+                type="button"
+                onClick={deleteCalendar}
+                style={{ maxWidth: "15%" }}
+            >
+                ✕
+            </button>
+            <div className="setting-item-control">
+                <input
+                    type="text"
+                    value={setting.name}
+                    style={{
+                        width: "100%",
+                        marginLeft: 4,
+                        marginRight: 4,
+                    }}
+                    onChange={(e) =>
+                        onSettingChange({ ...setting, name: e.target.value })
+                    }
+                />
+            </div>
+            <input
+                style={{ maxWidth: "25%", minWidth: "3rem" }}
+                type="color"
+                value={setting.color}
+                onChange={(e) =>
+                    onSettingChange({ ...setting, color: e.target.value })
+                }
+            />
+        </div>
+    );
+};
+
+function ColorPickerGroup<T extends Partial<CalendarInfo>>({
+    source,
+    updateSettingListener,
+}: ColorPickerGroupProps<T>) {
+    let sourceWithClassify = source as SourceWith<
+        T,
+        { category: ClassifyInfo[] }
+    >;
+    return (
+        <div>
+            <div className="setting-item">
+                <div className="setting-item-info">
+                    <div className="setting-item-name">Color</div>
+                    <div className="setting-item-description">
+                        The color of events on the calendar
+                    </div>
+                </div>
+                <div className="setting-item-control">
+                    <button
+                        type="button"
+                        className="mod-cta"
+                        onClick={(e) => {
+                            sourceWithClassify.category.push({
+                                name: "default",
+                                color: "#8f4d4d",
+                            });
+                            const curVal = { ...sourceWithClassify };
+                            updateSettingListener(() => curVal);
+                        }}
+                    >
+                        Add Color
+                    </button>
+                </div>
+            </div>
+            {sourceWithClassify.category.map((s, idx) => (
+                <ColorPickerRow
+                    key={idx}
+                    setting={s}
+                    onSettingChange={(classifyInfo) => {
+                        sourceWithClassify.category = [
+                            ...sourceWithClassify.category.slice(0, idx),
+                            classifyInfo,
+                            ...sourceWithClassify.category.slice(idx + 1),
+                        ];
+                        sourceWithClassify.color =
+                            sourceWithClassify.category[0].color;
+                        const curVal = { ...sourceWithClassify };
+                        updateSettingListener(() => curVal);
+                    }}
+                    deleteCalendar={() => {
+                        sourceWithClassify.category = [
+                            ...sourceWithClassify.category.slice(0, idx),
+                            ...sourceWithClassify.category.slice(idx + 1),
+                        ];
+                        const curVal = { ...sourceWithClassify };
+                        updateSettingListener(() => curVal);
+                    }}
+                />
+            ))}
         </div>
     );
 }
@@ -243,6 +363,12 @@ export const AddCalendarSource = ({
         return (e) => setSettingState(fromString(e.target.value));
     }
 
+    function updateSettingListener<T extends Partial<CalendarInfo>>(
+        provider: () => T
+    ) {
+        setSettingState(provider());
+    }
+
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         if (!submitting) {
@@ -260,9 +386,14 @@ export const AddCalendarSource = ({
                     // a single color to be used for all calendars, default to the
                     // colors reported from the server. Users can change that later
                     // if they wish.
-                    <ColorPicker
+                    // <ColorPicker
+                    //     source={setting}
+                    //     changeListener={makeChangeListener}
+                    // />
+
+                    <ColorPickerGroup
                         source={setting}
-                        changeListener={makeChangeListener}
+                        updateSettingListener={updateSettingListener}
                     />
                 )}
                 {source.type === "local" && (

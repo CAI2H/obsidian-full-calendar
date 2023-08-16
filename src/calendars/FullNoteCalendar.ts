@@ -2,7 +2,7 @@ import { TFile, TFolder, parseYaml } from "obsidian";
 import { rrulestr } from "rrule";
 import { EventPathLocation } from "../core/EventStore";
 import { ObsidianInterface } from "../ObsidianAdapter";
-import { OFCEvent, EventLocation, validateEvent } from "../types";
+import { OFCEvent, EventLocation, validateEvent, ClassifyInfo } from "../types";
 import { EditableCalendar, EditableEventResponse } from "./EditableCalendar";
 
 const basenameFromEvent = (event: OFCEvent): string => {
@@ -146,14 +146,25 @@ function modifyFrontmatterString(
 export default class FullNoteCalendar extends EditableCalendar {
     app: ObsidianInterface;
     private _directory: string;
+    private _category: ClassifyInfo[];
 
-    constructor(app: ObsidianInterface, color: string, directory: string) {
+    constructor(
+        app: ObsidianInterface,
+        color: string,
+        directory: string,
+        category: ClassifyInfo[]
+    ) {
         super(color);
         this.app = app;
         this._directory = directory;
+        this._category = category;
     }
     get directory(): string {
         return this._directory;
+    }
+
+    get category(): { name: string; color: string }[] {
+        return this._category;
     }
 
     get type(): "local" {

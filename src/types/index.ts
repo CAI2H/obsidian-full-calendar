@@ -4,7 +4,7 @@ export type { OFCEvent } from "./schema";
 export { validateEvent } from "./schema";
 
 export { makeDefaultPartialCalendarSource } from "./calendar_settings";
-export type { CalendarInfo } from "./calendar_settings";
+export type { CalendarInfo, ClassifyInfo } from "./calendar_settings";
 
 export const PLUGIN_SLUG = "full-calendar-plugin";
 

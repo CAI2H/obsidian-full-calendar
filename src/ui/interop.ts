@@ -107,6 +107,8 @@ export function toEventInput(
         id,
         title: frontmatter.title,
         allDay: frontmatter.allDay,
+        backgroundColor: frontmatter.backgroundColor,
+        borderColor: frontmatter.borderColor,
     };
     if (frontmatter.type === "recurring") {
         event = {

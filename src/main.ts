@@ -28,7 +28,8 @@ export default class FullCalendarPlugin extends Plugin {
                 ? new FullNoteCalendar(
                       new ObsidianIO(this.app),
                       info.color,
-                      info.directory
+                      info.directory,
+                      info.category
                   )
                 : null,
         dailynote: (info) =>
@@ -36,11 +37,14 @@ export default class FullCalendarPlugin extends Plugin {
                 ? new DailyNoteCalendar(
                       new ObsidianIO(this.app),
                       info.color,
-                      info.heading
+                      info.heading,
+                      info.category
                   )
                 : null,
         ical: (info) =>
-            info.type === "ical" ? new ICSCalendar(info.color, info.url) : null,
+            info.type === "ical"
+                ? new ICSCalendar(info.color, info.url, info.category)
+                : null,
         caldav: (info) =>
             info.type === "caldav"
                 ? new CalDAVCalendar(
@@ -52,7 +56,8 @@ export default class FullCalendarPlugin extends Plugin {
                           password: info.password,
                       },
                       info.url,
-                      info.homeUrl
+                      info.homeUrl,
+                      info.category
                   )
                 : null,
         FOR_TEST_ONLY: () => null,
@@ -72,6 +77,13 @@ export default class FullCalendarPlugin extends Plugin {
                 active: true,
             });
         } else {
+            let viewState = leaves[0].getViewState();
+            if (!viewState.active) {
+                await leaves[0].setViewState({
+                    type: FULL_CALENDAR_VIEW_TYPE,
+                    active: true,
+                });
+            }
             await Promise.all(
                 leaves.map((l) => (l.view as CalendarView).onOpen())
             );

@@ -1,7 +1,7 @@
 import { DateTime } from "luxon";
 import * as React from "react";
 import { useEffect, useRef, useState } from "react";
-import { CalendarInfo, OFCEvent } from "../../types";
+import { CalendarInfo, ClassifyInfo, OFCEvent } from "../../types";
 
 function makeChangeListener<T>(
     setState: React.Dispatch<React.SetStateAction<T>>,
@@ -81,6 +81,7 @@ interface EditEventProps {
         id: string;
         name: string;
         type: CalendarInfo["type"];
+        category: ClassifyInfo[];
     }[];
     defaultCalendarIndex: number;
     initialEvent?: Partial<OFCEvent>;
@@ -138,6 +139,12 @@ export const EditEvent = ({
     const [allDay, setAllDay] = useState(initialEvent?.allDay || false);
 
     const [calendarIndex, setCalendarIndex] = useState(defaultCalendarIndex);
+    const colorIndex = calendars[defaultCalendarIndex].category.findIndex(
+        (x) => x.color === initialEvent?.backgroundColor
+    );
+    const [calendarColorIndex, setCalendarColorIndex] = useState(
+        colorIndex == -1 ? defaultCalendarIndex : colorIndex
+    );
 
     const [complete, setComplete] = useState(
         initialEvent?.type === "single" &&
@@ -189,6 +196,8 @@ export const EditEvent = ({
                           endDate: endDate || null,
                           completed: isTask ? complete : null,
                       }),
+                backgroundColor: `'${calendars[calendarIndex]?.category[calendarColorIndex]?.color}'`,
+                borderColor: `'${calendars[calendarIndex]?.category[calendarColorIndex]?.color}'`,
             },
             calendarIndex
         );
@@ -246,6 +255,24 @@ export const EditEvent = ({
                                         : "Daily Note"}
                                 </option>
                             ))}
+                    </select>
+
+                    <select
+                        id="calendar_color"
+                        value={calendarColorIndex}
+                        style={{
+                            marginLeft: 4,
+                        }}
+                        onChange={makeChangeListener(
+                            setCalendarColorIndex,
+                            parseInt
+                        )}
+                    >
+                        {calendars[calendarIndex].category.map((cal, idx) => (
+                            <option key={idx} value={idx}>
+                                {cal.name}
+                            </option>
+                        ))}
                     </select>
                 </p>
                 <p>

@@ -17,7 +17,13 @@ import {
 } from "obsidian-daily-notes-interface";
 import { EventPathLocation } from "../core/EventStore";
 import { ObsidianInterface } from "../ObsidianAdapter";
-import { OFCEvent, EventLocation, CalendarInfo, validateEvent } from "../types";
+import {
+    OFCEvent,
+    EventLocation,
+    CalendarInfo,
+    validateEvent,
+    ClassifyInfo,
+} from "../types";
 import { EventResponse } from "./Calendar";
 import { EditableCalendar, EditableEventResponse } from "./EditableCalendar";
 
@@ -235,12 +241,23 @@ const addToHeading = (
 export default class DailyNoteCalendar extends EditableCalendar {
     app: ObsidianInterface;
     heading: string;
+    private _category: ClassifyInfo[];
 
-    constructor(app: ObsidianInterface, color: string, heading: string) {
+    constructor(
+        app: ObsidianInterface,
+        color: string,
+        heading: string,
+        category: ClassifyInfo[]
+    ) {
         super(color);
         appHasDailyNotesPluginLoaded();
         this.app = app;
         this.heading = heading;
+        this._category = category;
+    }
+
+    get category(): { name: string; color: string }[] {
+        return this._category;
     }
 
     get type(): CalendarInfo["type"] {
@@ -282,7 +299,8 @@ export default class DailyNoteCalendar extends EditableCalendar {
 
     async getEvents(): Promise<EventResponse[]> {
         const notes = getAllDailyNotes();
-        const files = Object.values(notes) as TFile[];
+        const files = Object.values(notes) as unknown as TFile[];
+
         return (
             await Promise.all(files.map((f) => this.getEventsInFile(f)))
         ).flat();
@@ -297,9 +315,9 @@ export default class DailyNoteCalendar extends EditableCalendar {
             throw new Error("Cannot create a recurring event in a daily note.");
         }
         const m = moment(event.date);
-        let file = getDailyNote(m, getAllDailyNotes()) as TFile;
+        let file = getDailyNote(m, getAllDailyNotes()) as unknown as TFile;
         if (!file) {
-            file = (await createDailyNote(m)) as TFile;
+            file = (await createDailyNote(m)) as unknown as TFile;
         }
         const metadata = await this.app.waitForMetadata(file);
 
@@ -375,9 +393,12 @@ export default class DailyNoteCalendar extends EditableCalendar {
             console.debug("daily note event moving to a new file.");
             // TODO: Factor this out with the createFile path.
             const m = moment(newEvent.date);
-            let newFile = getDailyNote(m, getAllDailyNotes()) as TFile;
+            let newFile = getDailyNote(
+                m,
+                getAllDailyNotes()
+            ) as unknown as TFile;
             if (!newFile) {
-                newFile = (await createDailyNote(m)) as TFile;
+                newFile = (await createDailyNote(m)) as unknown as TFile;
             }
             await this.app.read(newFile);
 
