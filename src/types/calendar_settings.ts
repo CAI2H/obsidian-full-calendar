@@ -84,7 +84,7 @@ export function makeDefaultPartialCalendarSource(
     const category = new Array<ClassifyInfo>();
     category.push({
         name: "default",
-        color: "#8f4d4d",
+        color: "#12d9d6",
     });
     return {
         type: type,
