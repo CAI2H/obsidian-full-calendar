@@ -98,8 +98,13 @@ export default class FullCalendarPlugin extends Plugin {
         const events = allEvents.flatMap((x) => x.events);
         events.forEach((event) => {
             const fullEvent = this.cache.getEventById(event.id);
-            if (fullEvent != null && !fullEvent.allDay) {
+            if (
+                fullEvent != null &&
+                !fullEvent.allDay &&
+                fullEvent.type === "single"
+            ) {
                 if (
+                    moment().isSame(moment(fullEvent.date), "day") &&
                     moment().isBetween(
                         moment(
                             moment().format(`yyyy-MM-DD ${fullEvent.startTime}`)
