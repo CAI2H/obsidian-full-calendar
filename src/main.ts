@@ -19,6 +19,7 @@ import FullNoteCalendar from "./calendars/FullNoteCalendar";
 import DailyNoteCalendar from "./calendars/DailyNoteCalendar";
 import ICSCalendar from "./calendars/ICSCalendar";
 import CalDAVCalendar from "./calendars/CalDAVCalendar";
+import moment from "moment";
 
 export default class FullCalendarPlugin extends Plugin {
     settings: FullCalendarSettings = DEFAULT_SETTINGS;
@@ -65,6 +66,7 @@ export default class FullCalendarPlugin extends Plugin {
 
     renderCalendar = renderCalendar;
     processFrontmatter = toEventInput;
+    statusBar!: HTMLDivElement;
 
     async activateView() {
         const leaves = this.app.workspace
@@ -88,11 +90,47 @@ export default class FullCalendarPlugin extends Plugin {
                 leaves.map((l) => (l.view as CalendarView).onOpen())
             );
         }
+        await this.refreshStatusBar();
     }
+
+    async refreshStatusBar() {
+        const allEvents = this.cache.getAllEvents();
+        const events = allEvents.flatMap((x) => x.events);
+        events.forEach((event) => {
+            const fullEvent = this.cache.getEventById(event.id);
+            if (fullEvent != null && !fullEvent.allDay) {
+                if (
+                    moment().isBetween(
+                        moment(
+                            moment().format(`yyyy-MM-DD ${fullEvent.startTime}`)
+                        ),
+                        moment(
+                            moment().format(`yyyy-MM-DD ${fullEvent.endTime}`)
+                        )
+                    )
+                ) {
+                    const text = `Now: ${fullEvent.title}`;
+                    if (text != this.statusBar.innerText) {
+                        this.statusBar.innerText = `Now ${fullEvent.startTime} ${fullEvent.title}`;
+                        return;
+                    }
+                }
+            }
+        });
+    }
+
     async onload() {
         await this.loadSettings();
 
         this.cache.reset(this.settings.calendarSources);
+        const statusBarItemEl = this.addStatusBarItem();
+        this.statusBar = statusBarItemEl.createEl("div");
+
+        this.registerInterval(
+            window.setInterval(async () => {
+                this.refreshStatusBar();
+            }, 2000)
+        );
 
         this.registerEvent(
             this.app.metadataCache.on("changed", (file) => {
