@@ -96,6 +96,7 @@ export default class FullCalendarPlugin extends Plugin {
     async refreshStatusBar() {
         const allEvents = this.cache.getAllEvents();
         const events = allEvents.flatMap((x) => x.events);
+        let match = false;
         events.forEach((event) => {
             const fullEvent = this.cache.getEventById(event.id);
             if (
@@ -117,11 +118,15 @@ export default class FullCalendarPlugin extends Plugin {
                     const text = `Now: ${fullEvent.title}`;
                     if (text != this.statusBar.innerText) {
                         this.statusBar.innerText = `Now ${fullEvent.startTime} ${fullEvent.title}`;
+                        match = true;
                         return;
                     }
                 }
             }
         });
+        if (!match) {
+            this.statusBar.innerText = "";
+        }
     }
 
     async onload() {
@@ -130,6 +135,9 @@ export default class FullCalendarPlugin extends Plugin {
         this.cache.reset(this.settings.calendarSources);
         const statusBarItemEl = this.addStatusBarItem();
         this.statusBar = statusBarItemEl.createEl("div");
+        this.statusBar.onclick = async (ev: any) => {
+            await this.activateView();
+        };
 
         this.registerInterval(
             window.setInterval(async () => {
