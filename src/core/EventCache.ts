@@ -342,7 +342,9 @@ export default class EventCache {
             this.getInfoForEditableEvent(eventId);
         const { path, lineNumber } = oldLocation;
         console.debug("updating event with ID", eventId);
-        newEvent.color = "'" + newEvent.color + "'";
+        if (newEvent.color !== undefined && !/^'#(.+)'$/.test(newEvent.color)) {
+            newEvent.color = "'" + newEvent.color + "'";
+        }
         await calendar.modifyEvent(
             { path, lineNumber },
             newEvent,

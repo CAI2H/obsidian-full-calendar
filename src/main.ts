@@ -115,10 +115,13 @@ export default class FullCalendarPlugin extends Plugin {
                         )
                     )
                 ) {
-                    const text = `Now: ${fullEvent.title}`;
+                    match = true;
+                    const text = `Now ${fullEvent.startTime} ${fullEvent.title}`;
                     if (text != this.statusBar.innerText) {
-                        this.statusBar.innerText = `Now ${fullEvent.startTime} ${fullEvent.title}`;
-                        match = true;
+                        this.statusBar.innerText = text;
+                        new Notification(`Task started, ${text}`, {
+                            requireInteraction: true,
+                        });
                         return;
                     }
                 }

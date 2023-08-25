@@ -140,7 +140,9 @@ export const EditEvent = ({
 
     const [calendarIndex, setCalendarIndex] = useState(defaultCalendarIndex);
     const colorIndex = calendars[defaultCalendarIndex].category.findIndex(
-        (x) => x.color === initialEvent?.color
+        (x) =>
+            x.color === initialEvent?.color ||
+            `\'${x.color}\'` === initialEvent?.color
     );
     const [calendarColorIndex, setCalendarColorIndex] = useState(
         colorIndex == -1 ? defaultCalendarIndex : colorIndex
